@@ -1,0 +1,191 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Readme</title>
+  <link rel="stylesheet" href="https://stackedit.io/style.css" />
+</head>
+
+<body class="stackedit">
+  <div class="stackedit__left">
+    <div class="stackedit__toc">
+      
+<ul>
+<li><a href="#react-water-tank">React Water Tank</a></li>
+<li><a href="#installation">Installation</a></li>
+<li><a href="#usage">Usage</a></li>
+<li><a href="#developer">Developer</a></li>
+</ul>
+
+    </div>
+  </div>
+  <div class="stackedit__right">
+    <div class="stackedit__html">
+      <h1 id="react-water-tank">React Water Tank</h1>
+<p>This is a simple library to manage the global states like <code>Redux/Flux</code> does. You can use it both in a React JS project or a React Native project!<br>
+<strong>No more redux or context API or Flux!</strong> This is also controlled using event-driven architecture, and you can connect your components using a hoc or a hook which has the direct communication with the <strong>store</strong>. This is very simple and there is no complexity to use it like redux/flux or react context. You can register your states as a state holder easily and manage them from their own methods (You will be given from the hooks or from the hoc props!)</p>
+<h1 id="installation">Installation</h1>
+<pre><code>npm install react-water-tank
+</code></pre>
+<h1 id="usage">Usage</h1>
+<p><strong>Create Global States</strong></p>
+<blockquote>
+<p>Create a folder named <code>states</code> at the root of your project<br>
+Inside the <code>states</code> directory you can put your global states like below</p>
+</blockquote>
+<pre><code>// AuthState.js
+export const AuthState = {
+    is_logged_in: false,
+    user_id: '',
+};
+
+// TodoState.js
+export const TodoState = {
+    data: [],
+};
+</code></pre>
+<p><strong>Register State Holders (Global States)</strong></p>
+<blockquote>
+<p>Put these line of codes into a top level component such as <code>index.js</code> or <code>App.js</code><br>
+If you do not register the state holders into a top level component, that would not be a problem, but you might not be able to access the later defined states into some components that are mounted before the state holder registration.</p>
+</blockquote>
+<pre><code>import {registerStateHolder} from "react-water-tank";
+import {AuthState, TodoState} from './states';
+
+registerStateHolder("auth", AuthState);
+registerStateHolder("todo", TodoState);
+</code></pre>
+<p><strong>Unregister State Holders (Global States)</strong></p>
+<blockquote>
+<p>You can unregister a state holder object by the following way.</p>
+</blockquote>
+<pre><code>import { unregisterStateHolder } from "react-water-tank";
+
+unregisterStateHolder("todo");
+</code></pre>
+<p><strong>Dispatching</strong></p>
+<blockquote>
+<p>You can call the following function to dispatch store changes manually</p>
+</blockquote>
+<pre><code>import { dispatch } from "react-water-tank";
+
+dispatch();
+</code></pre>
+<p><strong>Connect to store from a component</strong></p>
+<blockquote>
+<p>Both for functional or class component you can use a <strong>HOC</strong> which will pass a prop as the <strong>state holder name</strong>. See the below code carefully:</p>
+</blockquote>
+<p><em>Class Component</em></p>
+<pre><code>import { connectWaterTankPipe } from "react-water-tank";
+
+class Todos extends React.Component {
+    render() {
+	    // Grab the state and it's change method
+	    const {state, setState} = this.props.todo;
+	    
+	    return (
+		    &lt;React.Fragment&gt;
+			    {/* Your JSX */}
+		    &lt;/React.Fragment&gt;
+	    );
+    }
+}
+
+// Here you need to pass the state holder name
+// For creating connection to the state directly
+export default connectWaterTankPipe("todo")(Todos);
+</code></pre>
+<p><em>Functional Component</em></p>
+<pre><code>import { connectWaterTankPipe } from "react-water-tank";
+import { Button } from "./components/Button";
+
+function Login(props) {
+    const {state, setState} = props.auth;
+    
+    const handleClick = () =&gt; setState({
+	    is_logged_in: true,
+    });
+    
+    return (
+	    &lt;React.Fragment&gt;
+		    &lt;Button
+			    onClick={handleClick}
+			    title={"Login"}
+		    /&gt;
+	    &lt;/React.Fragment&gt;
+    );
+}
+
+// Here you need to pass the state holder name
+// For creating connection to the state directly
+export default connectWaterTankPipe("auth")(Login);
+</code></pre>
+<p><strong>Hooks Support</strong></p>
+<blockquote>
+<p>You can also use hooks to make the easier connection with a state holder<br>
+Follow the below code (The usage of hooks)</p>
+</blockquote>
+<pre><code>import { useWaterTankPipe } from "react-water-tank";
+import { Button } from "./components/Button";
+
+function Login(props) {
+    const [state, setState] = useWaterTankPipe("auth");
+    
+    const handleClick = () =&gt; setState({
+	    is_logged_in: true,
+    });
+    
+    return (
+	    &lt;React.Fragment&gt;
+		    &lt;Button
+			    onClick={handleClick}
+			    title={"Login"}
+		    /&gt;
+	    &lt;/React.Fragment&gt;
+    );
+}
+
+export default Login;
+</code></pre>
+<p><strong>Update multiple state holder object</strong></p>
+<pre><code>import { setStateHolderState } from "react-water-tank";
+import { Button } from "./components/Button";
+
+function Home(props) {
+    
+    const logout = () =&gt; setStateHolderState("auth", {
+	    is_logged_in: false,
+    });
+    
+    const clearTodos = () =&gt; setStateHolderState("todo", {
+	    data: [],
+    });
+    
+    return (
+	    &lt;React.Fragment&gt;
+		    &lt;Button
+			    onClick={logout}
+			    title={"Logout"}
+		    /&gt;
+		    
+		    &lt;Button
+			    onClick={clearTodos}
+			    title={"Clear Todos"}
+		    /&gt;
+	    &lt;/React.Fragment&gt;
+    );
+}
+
+export default Home;
+</code></pre>
+<h1 id="developer">Developer</h1>
+<p><strong>Mohammed Nayeem</strong><br>
+GitHub: <a href="http://github.com/chiefnayeem">http://github.com/chiefnayeem</a></p>
+
+    </div>
+  </div>
+</body>
+
+</html>
